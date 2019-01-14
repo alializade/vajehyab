@@ -1,0 +1,92 @@
+#!/bin/bash
+
+if ! type jq > /dev/null; then
+  if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    os_distro=`cat /etc/os-release | grep ^NAME= | cut -f2 -d= | sed -r 's/\"//g'`
+
+    case $os_distro in
+    Ubuntu)
+      sudo apt-get install jq
+      ;;
+    Debian)
+      sudo apt-get install jq
+      ;;
+    Fedora)
+      sudo dnf install jq
+      ;;
+    openSUSE)
+      sudo zypper install jq
+      ;;
+    Arch)
+      sudo pacman -Sy jq
+      ;;
+    esac
+
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install jq
+  elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    pkg install jq
+    make -C /usr/ports/textproc/jq install clean
+  fi
+fi
+
+vajeyab_conf_file=/etc/vajeyab
+
+if [ ! -f $vajeyab_conf_file ]; then
+    echo "API_KEY=65227.V6nWmuNgEFv6PKLMFrviwGbbZQB5IW7D2vApZoGE" > $vajeyab_conf_file
+
+    sudo chown -R root $vajeyab_conf_file
+fi
+
+if [[ $1 != '' ]]; then
+  case $1 in
+    config | --config | -C | -c )
+      while IFS= read vajeyab_conf_line; do
+        is_matched_with_api_key=`echo $vajeyab_conf_line | grep "^API_KEY="`
+
+        if [[ $is_matched_with_api_key != '' && $2 != '' ]]; then
+          case $2 in
+            API_KEY | KEY | api_key | apiKey | key | apikey | --api-key | --apiKey )
+              if [[ $3 != '' ]]; then
+                API_KEY=$3
+
+                OPTION_KEY=`echo $vajeyab_conf_line | cut -f1 -d=`
+
+                TARGET_KEY_VALUE_OPTION=`echo $OPTION_KEY=$API_KEY`
+
+                echo `cat $vajeyab_conf_file | sed "s/$vajeyab_conf_line/$TARGET_KEY_VALUE_OPTION/g"` > $vajeyab_conf_file
+              fi
+              ;;
+            * )
+              printf "\e[31mYou should define the configuration option for editing!\e[39m\n"
+              ;;
+          esac
+        fi
+      done < "$vajeyab_conf_file"
+      ;;
+    * )
+      query=$1
+
+      API_KEY_VALUE_OPTION=`cat /etc/vajeyab | grep "^API_KEY="`
+
+      if [[ $API_KEY_VALUE_OPTION != '' ]]; then
+        API_KEY=`echo $API_KEY_VALUE_OPTION | cut -f2 -d=`
+
+        url="http://api.vajehyab.com/v3/search?token=$API_KEY&q=$query&type=exact&filter=dehkhoda,moein,amid"
+
+        result=`curl $url 2>/dev/null`
+        result_data=`echo $result | jq '.data.results'`
+        result_count=`echo $result_data | jq 'length'`
+
+        printf "======================================\n\e[92mYou searched for: $query\e[39m\n======================================\n\n"
+
+        for (( i = 0; i < $result_count; i++ )); do
+          echo -e `echo $result_data | jq ".[$i].source" | sed 's/\"//g'`"\n--------------------------------------"
+          echo -e `echo $result_data | jq ".[$i].text" | sed 's/\"//g'`"\n\n"
+        done
+      fi
+      ;;
+  esac
+else
+  printf "\e[31mYou should define the query for searching!\e[39m\n"
+fi
