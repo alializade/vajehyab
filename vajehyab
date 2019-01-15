@@ -1,18 +1,12 @@
 #!/bin/bash
 
-vajeyab_conf_file=/etc/vajeyab
-
-if [ ! -f $vajeyab_conf_file ]; then
-    echo "API_KEY=65227.V6nWmuNgEFv6PKLMFrviwGbbZQB5IW7D2vApZoGE" > $vajeyab_conf_file
-
-    sudo chown -R root $vajeyab_conf_file
-fi
+vajehyab_conf_file=./etc/vajehyab.d
 
 if [[ $1 != '' ]]; then
   case $1 in
     config | --config | -C | -c )
-      while IFS= read vajeyab_conf_line; do
-        is_matched_with_api_key=`echo $vajeyab_conf_line | grep "^API_KEY="`
+      while IFS= read vajehyab_conf_line; do
+        is_matched_with_api_key=`echo $vajehyab_conf_line | grep "^API_KEY="`
 
         if [[ $is_matched_with_api_key != '' && $2 != '' ]]; then
           case $2 in
@@ -20,11 +14,11 @@ if [[ $1 != '' ]]; then
               if [[ $3 != '' ]]; then
                 API_KEY=$3
 
-                OPTION_KEY=`echo $vajeyab_conf_line | cut -f1 -d=`
+                OPTION_KEY=`echo $vajehyab_conf_line | cut -f1 -d=`
 
                 TARGET_KEY_VALUE_OPTION=`echo $OPTION_KEY=$API_KEY`
 
-                echo `cat $vajeyab_conf_file | sed "s/$vajeyab_conf_line/$TARGET_KEY_VALUE_OPTION/g"` > $vajeyab_conf_file
+                echo `cat $vajehyab_conf_file | sed "s/$vajehyab_conf_line/$TARGET_KEY_VALUE_OPTION/g"` > $vajehyab_conf_file
               fi
               ;;
             * )
@@ -32,12 +26,12 @@ if [[ $1 != '' ]]; then
               ;;
           esac
         fi
-      done < "$vajeyab_conf_file"
+      done < "$vajehyab_conf_file"
       ;;
     * )
       query=$1
 
-      API_KEY_VALUE_OPTION=`cat /etc/vajeyab | grep "^API_KEY="`
+      API_KEY_VALUE_OPTION=`cat $vajehyab_conf_file | grep "^API_KEY="`
 
       if [[ $API_KEY_VALUE_OPTION != '' ]]; then
         API_KEY=`echo $API_KEY_VALUE_OPTION | cut -f2 -d=`
