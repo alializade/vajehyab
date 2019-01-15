@@ -1,16 +1,12 @@
 # واژه‌یاب
 
-### جستجو بلادرنگ کلمات
-
-هر کلمه‌ای را که دوست دارید، می‌توانید به راحتی جستجو کنید.
+### Real-Time searching on dictionary
 
 ```sh
 vajeyab YOUR_TARGET_WORD
 ```
 
-### اضافه کردن توکن API شخصی
-
-شما علاوه بر اینکه به راحتی می‌توانید کلمات را به راحتی هرچه تمام‌تر جستجو کنید، امکان تغییر توکن API را نیز دارا هستید.
+### change your API key
 
 ```sh
 vajeyab --config API_KEY YOUR_API_KEY
