@@ -2,6 +2,12 @@
 
 vajeyab_conf_file=/etc/vajeyab
 
+if [ ! -f $vajeyab_conf_file ]; then
+    echo "API_KEY=65227.V6nWmuNgEFv6PKLMFrviwGbbZQB5IW7D2vApZoGE" > $vajeyab_conf_file
+
+    sudo chown -R root $vajeyab_conf_file
+fi
+
 if [[ $1 != '' ]]; then
   case $1 in
     config | --config | -C | -c )
