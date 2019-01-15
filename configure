@@ -1,0 +1,11 @@
+#!/bin/bash
+
+vajehyab_conf_file=/etc/vajehyab
+
+if [ ! -f $vajeyab_conf_file ]; then
+    echo "API_KEY=65227.V6nWmuNgEFv6PKLMFrviwGbbZQB5IW7D2vApZoGE" > $vajeyab_conf_file
+
+    chown -R root $vajeyab_conf_file
+fi
+
+exit 0
