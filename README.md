@@ -1,4 +1,4 @@
-# واژه‌یاب
+# Vajehyab
 
 ### Real-Time searching on dictionary
 
