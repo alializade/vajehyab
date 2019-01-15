@@ -1,42 +1,6 @@
 #!/bin/bash
 
-if ! type jq > /dev/null; then
-  if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    os_distro=`cat /etc/os-release | grep ^NAME= | cut -f2 -d= | sed -r 's/\"//g'`
-
-    case $os_distro in
-    Ubuntu)
-      sudo apt-get install jq
-      ;;
-    Debian)
-      sudo apt-get install jq
-      ;;
-    Fedora)
-      sudo dnf install jq
-      ;;
-    openSUSE)
-      sudo zypper install jq
-      ;;
-    Arch)
-      sudo pacman -Sy jq
-      ;;
-    esac
-
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install jq
-  elif [[ "$OSTYPE" == "freebsd"* ]]; then
-    pkg install jq
-    make -C /usr/ports/textproc/jq install clean
-  fi
-fi
-
 vajeyab_conf_file=/etc/vajeyab
-
-if [ ! -f $vajeyab_conf_file ]; then
-    echo "API_KEY=65227.V6nWmuNgEFv6PKLMFrviwGbbZQB5IW7D2vApZoGE" > $vajeyab_conf_file
-
-    sudo chown -R root $vajeyab_conf_file
-fi
 
 if [[ $1 != '' ]]; then
   case $1 in
