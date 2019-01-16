@@ -1,6 +1,6 @@
 #!/bin/bash
 
-vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/var/vajehyab.d"
+vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/configuration"
 
 if [[ $1 != '' ]]; then
 
