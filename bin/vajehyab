@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/vajehyab.configuration"
-vajehyab_conf_file="../var/vajehyab.d"
+vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/var/vajehyab.d"
 
 if [[ $1 != '' ]]; then
 
@@ -55,7 +54,12 @@ if [[ $1 != '' ]]; then
 
       if [[ $API_KEY_VALUE_OPTION != '' && $SOURCES_KEY_VALUE_OPTION != '' ]]; then
         API_KEY=`echo $API_KEY_VALUE_OPTION | cut -f2 -d=`
-        SOURCES=`echo $SOURCES_KEY_VALUE_OPTION | cut -f2 -d=`
+
+        if [[ $2 != '' ]]; then
+          SOURCES=`echo $2 | tr -s "[ ,\-\;]+" ","`
+        else
+          SOURCES=`echo $SOURCES_KEY_VALUE_OPTION | cut -f2 -d=`
+        fi
 
         url="http://api.vajehyab.com/v3/search?token=$API_KEY&q=$query&type=exact&filter=$SOURCES"
 
