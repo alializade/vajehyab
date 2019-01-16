@@ -1,42 +1,63 @@
 #!/bin/bash
 
-vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/configuration"
+# vajehyab_conf_file="/usr/local/Cellar/vajehyab/*/vajehyab.configuration"
+vajehyab_conf_file="../var/vajehyab.d"
 
 if [[ $1 != '' ]]; then
+
   case $1 in
     config | --config | -C | -c )
       while IFS= read vajehyab_conf_line; do
-        is_matched_with_api_key=`echo $vajehyab_conf_line | grep "^API_KEY="`
 
-        if [[ $is_matched_with_api_key != '' && $2 != '' ]]; then
+        if [[ $2 != '' ]]; then
+          OPTION_KEY=`echo $vajehyab_conf_line | cut -f1 -d= | tr -s "[ ,_\-\;]+" "_" | tr "[a-z]" "[A-Z]"`
+          OPTION_VALUE=`echo $vajehyab_conf_line | cut -f2 -d=`
+
           case $2 in
-            API_KEY | KEY | api_key | apiKey | key | apikey | --api-key | --apiKey )
-              if [[ $3 != '' ]]; then
+            API_KEY | KEY | api_key | apiKey | key | apikey | --api-key | --apiKey | -k | -K )
+              SELECTED_OPTION="API_KEY"
+
+              if [[ $3 != '' && $OPTION_KEY == $SELECTED_OPTION ]]; then
                 API_KEY=$3
+                CONFIGURATION_CONTENT=`cat $vajehyab_conf_file`
 
-                OPTION_KEY=`echo $vajehyab_conf_line | cut -f1 -d=`
-
-                TARGET_KEY_VALUE_OPTION=`echo $OPTION_KEY=$API_KEY`
-
-                echo `cat $vajehyab_conf_file | sed "s/$vajehyab_conf_line/$TARGET_KEY_VALUE_OPTION/g"` > $vajehyab_conf_file
+                echo -e "$CONFIGURATION_CONTENT" | sed "s/${OPTION_VALUE}/${API_KEY}/" > $vajehyab_conf_file
               fi
               ;;
+
+            SOURCES | DATABASES | sources | databases | --sources | --databases | -s | -S )
+              SELECTED_OPTION="SOURCES"
+
+              if [[ $3 != '' && $OPTION_KEY == $SELECTED_OPTION ]]; then
+                SOURCES=`echo $3 | tr -s "[ ,\-\;]+" ","`
+                CONFIGURATION_CONTENT=`cat $vajehyab_conf_file`
+
+                echo -e "$CONFIGURATION_CONTENT" | sed "s/${OPTION_VALUE}/${SOURCES}/" > $vajehyab_conf_file
+              fi
+              ;;
+
             * )
               printf "\e[31mYou should define the configuration option for editing!\e[39m\n"
+              break
               ;;
           esac
+        else
+          printf "\e[31mYou should define the configuration option for editing!\e[39m\n"
         fi
       done < "$vajehyab_conf_file"
       ;;
+
     * )
       query=$1
 
       API_KEY_VALUE_OPTION=`cat $vajehyab_conf_file | grep "^API_KEY="`
+      SOURCES_KEY_VALUE_OPTION=`cat $vajehyab_conf_file | grep "^SOURCES="`
 
-      if [[ $API_KEY_VALUE_OPTION != '' ]]; then
+      if [[ $API_KEY_VALUE_OPTION != '' && $SOURCES_KEY_VALUE_OPTION != '' ]]; then
         API_KEY=`echo $API_KEY_VALUE_OPTION | cut -f2 -d=`
+        SOURCES=`echo $SOURCES_KEY_VALUE_OPTION | cut -f2 -d=`
 
-        url="http://api.vajehyab.com/v3/search?token=$API_KEY&q=$query&type=exact&filter=dehkhoda,moein,amid"
+        url="http://api.vajehyab.com/v3/search?token=$API_KEY&q=$query&type=exact&filter=$SOURCES"
 
         result=`curl $url 2>/dev/null`
         result_data=`echo $result | jq '.data.results'`
@@ -45,8 +66,8 @@ if [[ $1 != '' ]]; then
         printf "======================================\n\e[92mYou searched for: $query\e[39m\n======================================\n\n"
 
         for (( i = 0; i < $result_count; i++ )); do
-          echo -e `echo $result_data | jq ".[$i].source" | sed 's/\"//g'`"\n--------------------------------------"
-          echo -e `echo $result_data | jq ".[$i].text" | sed 's/\"//g'`"\n\n"
+          echo -e `echo $result_data | jq ".[$i].source" | sed -e 's/\"//g'`"\n--------------------------------------"
+          echo -e `echo $result_data | jq ".[$i].text" | sed -e 's/\"//g'`"\n\n"
         done
       fi
       ;;
